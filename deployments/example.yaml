@@ -1,0 +1,19 @@
+default_files_root: defaults
+# default_files:
+#   - file1.yaml
+#   - file2.yaml
+common_files_root: common
+# common_files:
+#   - file1.yaml
+#   - file2.yaml
+deploy_configs_root: example/
+# deploy_files:
+#   - file1.yaml
+#   - file2.yaml
+environments:
+  - dev:
+    - example/environments/dev.yaml
+  - test:
+    - example/environments/test.yaml
+  - prod:
+    - example/environments/prod.yaml
