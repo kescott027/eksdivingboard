@@ -6,7 +6,7 @@ with open("README.md") as fp:
 
 
 setuptools.setup(
-    name="infrastructure",
+    name="eksdivingboard",
     version="0.0.1",
 
     description="An empty CDK Python app",
@@ -15,8 +15,8 @@ setuptools.setup(
 
     author="author",
 
-    package_dir={"": "infrastructure"},
-    packages=setuptools.find_packages(where="infrastructure"),
+    package_dir={"": "eksdivingboard"},
+    packages=setuptools.find_packages(where="eksdivingboard"),
 
     install_requires=[
         "aws-cdk.core==1.123.0",

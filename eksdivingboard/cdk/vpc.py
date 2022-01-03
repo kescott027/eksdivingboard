@@ -1,18 +1,40 @@
 from aws_cdk import (
-    core as cdk,
     aws_ec2 as ec2,
     aws_logs as logs,
 )
+from .structures import StackConstruct
+import logging
 
-from structures import StackConstruct
+logger = logging.getLogger(__name__)
 
 
 class AwsVpc(StackConstruct):
-    def __init__(self, scope, id, cidr="10.0.0.0/16", **kwargs):
-        super().__init__(scope, id, **kwargs)
-        self._required_args = ['cidr']
-        self.cidr = None
+    def __init__(self, scope, configs):
+        super().__init__(scope, configs)
+        self.constructs = {}
+        self.construct_type = 'vpc'
         self.base_construct = ec2.Vpc
+        self.build()
+
+    @staticmethod
+    def set_defaults(options):
+        options.setdefault('cidr', '10.0.0.0/16')
+        return options
+
+    def build(self):
+        logger.debug(f'building {self.construct_type}')
+        for key in self.configs:
+            options = self.configs[key]
+            # for key, options in self.configs.items():
+            logger.debug(f'building {self.construct_type} {key}')
+            params = self._construct_params(options)
+            self.constructs[key] = self.base_construct(
+                self.scope,
+                key,
+                **params
+            )
+
+        return self.constructs
 
     @staticmethod
     def default_instance_tenancy(string_value):
@@ -46,8 +68,6 @@ class AwsVpc(StackConstruct):
                     nothing = None
                 if 'to_s3' in destination.keys():
                     bucket = None
-
-
 
         if traffic_type:
             params['traffic_type'] = None

@@ -1,0 +1,3 @@
+eks_cluster:
+  my_eks_cluster:
+    version: v1.21
