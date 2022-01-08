@@ -10,22 +10,39 @@ logger = logging.getLogger(__name__)
 
 class ConfigsCompiler(object):
 
-    def __init__(self,
-                 defaults_root=None,
-                 default_files=None,
-                 common_files_root=None,
-                 common_files=None,
-                 deploy_root=None,
-                 deploy_files=None,
-                 environments=None,
-                 environments_root=None,
-                 environment_files=None
-                 ):
+    _magic_methods = []
+
+    def __init__(self, **kwargs):
 
         self.base_path = os.getcwd()
         self.configs = {}
         self.variables = {}
-        self.environments = environments if environments else []
+        self.environments = []
+        self._environment_files = []
+        self._default_files = []
+        self._common_files = []
+        self._deploy_files = []
+        self._environment_files_root = None
+        self._defaults_root = None
+        self._common_files_root = None
+        self._deploy_root = None
+
+        if kwargs:
+            self.configure(**kwargs)
+
+    def configure(self,
+                  defaults_root=None,
+                  default_files=None,
+                  common_files_root=None,
+                  common_files=None,
+                  deploy_root=None,
+                  deploy_files=None,
+                  environments=None,
+                  environments_root=None,
+                  environment_files=None
+                  ):
+
+        self.environments = environments if environments else self.environments
         self._environment_files = [self.get_single_file(f) for f in environment_files] if environment_files else []
         self._default_files = [self.get_single_file(f) for f in default_files] if default_files else []
         self._common_files = [self.get_single_file(f) for f in common_files] if common_files else []
@@ -38,13 +55,25 @@ class ConfigsCompiler(object):
             common_files_root, '_common_files_root') if common_files_root else None
         self._deploy_root = self._format_dir_path(
             deploy_root, '_deploy_root') if deploy_root else None
-        self._magic_methods = []
 
-        self._get_files_by_directory_root()
-        self.process_configs()
-        logger.info(f"we've generated {self.configs}")
+        logger.debug(f"* * * * * * * * * * Setting Files * * * * * * * * * * * *")
+        logger.debug(f"\t environments {environments}")
+        logger.debug(f"\t environment files: {self._environment_files}")
+        logger.debug(f"\t default files {self._default_files}")
+        logger.debug(f"\t default root: {self._defaults_root}")
+        logger.debug(f"\t common files {self._common_files}")
+        logger.debug(f"\t common root: {self._common_files_root}")
+        logger.debug(f"\t deploy files {self._deploy_files}")
+        logger.debug(f"\t deploy root: {self._deploy_root}")
+        logger.debug(f"* * * * * * * * * * Setting Files * * * * * * * * * * * *")
+
+    def get_configs(self):
+        return self.configs
 
     def process_configs(self):
+        logger.debug(f"* * * * * * * * * * Retrieving files * * * * * * * * * * *")
+        self._get_files_by_directory_root()
+        logger.debug(f"* * * * * * * * * * Processing Configs * * * * * * * * * *")
         config_files = {
             '_environment_files': 'variables',
             '_default_files': 'configs',
@@ -53,11 +82,13 @@ class ConfigsCompiler(object):
         }
         for file_list, config_store in config_files.items():
             if getattr(self, file_list):
-                logger.debug(f'loading {file_list}')
+                logger.debug(f'# # # # # # # # loading {file_list} to {config_store} # # # # # # # #')
                 self.load_config_files(
                     getattr(self, file_list),
                     config_store
                 )
+            else:
+                logger.debug(f"# # # # # # # # NO {file_list} files found # # # # # # # # ")
 
     def process_variables(self, values):
         if not self.variables:
@@ -88,7 +119,7 @@ class ConfigsCompiler(object):
             return new_path
 
     def _get_files_by_directory_root(self):
-        logger.debug(f'deploy_root: {self._deploy_root}')
+        # logger.debug(f'deploy_root: {self._deploy_root}')
 
         recursive_file_roots = [
             {'source_attribute': self._environment_files_root,
@@ -127,6 +158,9 @@ class ConfigsCompiler(object):
             exclusions = [
                 item for item in dir_root['directory_exclusions'] if item] if dir_root.get(
                 'directory_exclusions', None) else None
+            logger.debug(f"\t source type: {source_type}")
+            logger.debug(f"\t source: {source}")
+            logger.debug(f"\t destination: {destination}")
             if source:
                 logger.info(f'loading {source_type} files from {source}')
                 logger.debug(f'preparing exclusions: {exclusions}')
@@ -204,4 +238,5 @@ class ConfigsCompiler(object):
                     logger.info(f"combined dict: {destination_dict}")
             except FileNotFoundError:
                 raise FileNotFoundError(f'cannot find file {yaml_file} in {str(os.getcwd())}')
+        logger.debug(f"saving combined dictionay to {destination_store}")
         setattr(self, destination_store, destination_dict)

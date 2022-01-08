@@ -7,6 +7,6 @@ app = cdk.App()
 InfrastructureStack(
     scope=app,
     construct_id="InfrastructureStack",
-    configs_root_path="/Users/kyleesc/git/eksdivingboard/deployments/example.yaml"
+    configs_root_path="/Users/kylescott/git/eksdivingboard/deployments/example.yaml"
     )
 app.synth()

@@ -14,7 +14,8 @@ class InfrastructureStack(Stack):
         self.configs = None
         self.environments = []
         self.defaults = None
-        self._config_compiler = None
+        self._config_compiler = ConfigsCompiler()
+        self._defaults_compiler = None
         self.stacks = {}
 
         self.load_configs(
@@ -26,22 +27,30 @@ class InfrastructureStack(Stack):
         self.build_stacks()
 
     def load_configs(self, configs_path, **kwargs):
-        defaults_path = kwargs.get('defaults_path', 'not defined')
+        logger.debug(f"============== Beginning Configuration Load ==================")
+        defaults_path = kwargs.get('defaults_root', 'not defined')
         logger.info(f'loading stack configs from {configs_path} with defaults {defaults_path}')
-        self._config_compiler = ConfigsCompiler(
+        self._config_compiler.configure(
             deploy_root=configs_path,
             **kwargs
         )
-
-        self.configs = self._config_compiler.configs
+        self._config_compiler.process_configs()
+        logger.debug(f"!!!!!! COMPILER CONFIGS !!!!!! {self._config_compiler.get_configs()}")
+        self.configs = self._config_compiler.get_configs()
+        logger.debug(f"####### configs ##########\n\t{self.configs}")
+        bob = """logger.debug(f"")
         if defaults_path:
-            self.defaults = ConfigsCompiler(defaults_path)
+            logger.debug(f"######## LOAD DEFAULTS ########")
+            self._defaults_compiler = ConfigsCompiler()
+            self._defaults_compiler.configure()
+            self.defaults = ConfigsCompiler(defaults_path)"""
         self.environments = self._config_compiler.environments
+        logger.debug(f"================= End Configuration Load =====================")
 
     def build_stacks(self):
         logger.info('building stack from configs')
         if not self.environments:
-            self.environments = [f"{self.id}-default-stack"]
+            self.environments = [f"{self.id}DefaultStack"]
         logger.info(f"building environments: {self.environments}")
         for environment in self.environments:
             stack = EnvironmentStack(self.scope, environment, self.configs)
