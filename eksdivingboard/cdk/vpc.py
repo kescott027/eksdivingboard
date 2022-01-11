@@ -73,3 +73,24 @@ class AwsVpc(StackConstruct):
             params['traffic_type'] = None
         return getattr(**params)
 
+    @staticmethod
+    def subnet_configuration(configuration):
+        subnets = []
+        for subnet in configuration:
+            for k, v in subnet.items():
+                config_name = k
+                subnet_type = getattr(
+                        ec2.SubnetType, v['subnet_type'].upper()
+                    ) if v.get('subnet_type') else None
+                mask = v.get('cidr_mask', None)
+                if isinstance(mask, str):
+                    mask = int(mask[v['cidr_mask'].find('/')+1:]) if mask.find('/') else int(mask)
+                logger.debug(f"Subnet {config_name} mask {mask}")
+                subnets.append(
+                    ec2.SubnetConfiguration(
+                        name=config_name,
+                        subnet_type=subnet_type,
+                        cidr_mask=mask
+                    )
+                )
+        return subnets

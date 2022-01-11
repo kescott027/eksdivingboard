@@ -1,0 +1,15 @@
+vpc:
+  default-vpc:
+    cidr: 10.0.0.0/16
+    nat_gateways: 1
+    max_azs: 3
+    subnet_configuration:
+      - public_subet:
+          subnet_type: public
+          cidr_mask: 20
+      - private_subet:
+          subnet_type: private
+          cidr_mask: 20
+      - data_subet:
+          subnet_type: private
+          cidr_mask: 20

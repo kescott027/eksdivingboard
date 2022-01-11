@@ -43,7 +43,7 @@ class StackConstruct(object):
         compiled_params = {}
         for key, values in self.set_defaults(params).items():
             if getattr(self, key, None):
-                compiled_params[key] = getattr(self, key)(**values)
+                compiled_params[key] = getattr(self, key)(values)
             else:
                 compiled_params[key] = values
         return compiled_params

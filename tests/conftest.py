@@ -16,15 +16,15 @@ def app():
 @pytest.fixture(scope="session")
 def stack(app):
     current_path = getcwd()
-    configs_root = path.join(current_path, "tests/fixtures/example")
-    defaults_root = path.join(current_path, "tests/fixtures/defaults")
-    environments_root = path.join(current_path, "tests/fixtures/example/environments")
+    configs_root = path.join(current_path, "tests/fixtures/example/")
+    defaults_root = path.join(current_path, "tests/fixtures/defaults/")
+    environments_root = path.join(current_path, "tests/fixtures/example/environments/")
 
     return InfrastructureStack(
         scope=app,
         id="InfrastructureStack",
         configs_root_path=configs_root,
-        # defaults_root_path=defaults_root,
+        defaults_root_path=defaults_root,
         environments_root_path=environments_root,
     )
 

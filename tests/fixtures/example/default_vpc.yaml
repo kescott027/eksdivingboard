@@ -2,4 +2,4 @@ vpc:
   default-vpc:
     cidr: '10.0.0.0/16'
     nat_gateways: 1
-    max_azs: 3
+    max_azs: 4
